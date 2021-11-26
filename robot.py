@@ -8,7 +8,6 @@ class world():
     def __init__(self):
         self.WorldMap = self.ParseMap()
         self.show_map()
-        print(self.WorldMap)
     
     def ParseMap(self):
         tree = ET.parse('SampleRoom.xml')
@@ -90,7 +89,7 @@ class robot():
     def move(self):
         while(True):
 
-            if len(self.path) == 0:
+            while len(self.path) == 0:
                 print("finding the new path according to the new informations")
                 self.findpath()
 
@@ -120,7 +119,5 @@ robot_world = world()
 y , x = robot_world.map_size()
 visible_map = [[None for _ in range(x)] for _ in range(y)]
 visible_map[robot_world.getrobotlocation()[0]][robot_world.getrobotlocation()[1]] = "empty"
-robot = robot(robot_world, visible_map, robot_world.getbattrylocation(), robot_world.getrobotlocation(), [])
+robot = robot(robot_world, visible_map,  robot_world.getbattrylocation(), robot_world.getrobotlocation(), [])
 robot.move()
-print ( robot_world.getrobotlocation())
-print ( robot_world.getbattrylocation())
