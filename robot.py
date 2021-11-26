@@ -1,11 +1,8 @@
 import xml.etree.ElementTree as ET
 import matplotlib.pyplot as plt
-from matplotlib import interactive
 import seaborn as sb
 import time
-import enum
-import Astar as A
-interactive(True)
+from Algorithm import Algorithm
 
 class world():
     def __init__(self):
@@ -26,6 +23,8 @@ class world():
         return Map
 
     def celltype(self, cell):
+        if cell[0] < 0 or cell[1] < 0 or cell[0] >= len(self.WorldMap) or cell[1] >= len(self.WorldMap[0]) :
+            return "obstacle"
         return self.WorldMap[cell[0]][cell[1]]
 
     def getrobotlocation(self):
@@ -69,55 +68,59 @@ class world():
         return len(self.WorldMap) , len(self.WorldMap[0])
 
 class robot():
-    def __init__(self, world, VisbleMap, destination, location, path, stepcount = 0) :
-        self.world = world
-        self.VisbleMap = VisbleMap
-        self.destination = destination
-        self.location = location
+    def __init__(self, world, visbleMap, destination, location, path, stepcount = 0):
         self.path = path
+        self.world = world
+        self.location = location
+        self.visbleMap = visbleMap
         self.stepcount = stepcount
+        self.destination = destination
+        self.alogorithm_ = Algorithm(visbleMap, location, destination)
 
     def findpath(self):
-        parh = A.manhattan(VisbleMap, location, destination)
+        self.alogorithm_.set_map(self.visbleMap)
+        self.alogorithm_.set_robot_location(self.location)
+        self.path = self.alogorithm_.exec()
 
     def battryfound(self):
-        if (VisbleMap[location[0]][location[1]] == "Battery"):
+        if (visbleMap[location[0]][location[1]] == "Battery"):
             return True
         return False   
 
     def move(self):
-        
-        if (len(path) == 0):
-            print("finding the new paht according to the new informations")
-            return
-        while(len(path) != 0):
-            cell = (self.location[0] + path[0][0] , self.location[1] + path[0][1])
+        while(True):
+
+            if len(self.path) == 0:
+                print("finding the new path according to the new informations")
+                self.findpath()
+
+            cell = (self.location[0] + self.path[0][0] , self.location[1] + self.path[0][1])
             targetcelltype = self.world.celltype(cell)
-            path.pop(0)
-            if (targetcelltype == "Battery"):
+            self.path.pop(0)
+            
+            if targetcelltype == "Battery":
                 self.world.update_map(self.location, cell)
                 self.location = cell
                 self.stepcount += 1
                 print("battery found in ", self.stepcount , " steps!")
                 return
-            elif (targetcelltype == "empty"):
+            elif targetcelltype == "empty":
                 self.world.update_map(self.location, cell)
                 self.location = cell
                 self.stepcount += 1
-                self.VisbleMap[cell[0]][cell[1]] = "empty"
-            elif (targetcelltype == "obstacle"):
+                self.visbleMap[cell[0]][cell[1]] = "empty"
+            elif targetcelltype == "obstacle":
                 self.stepcount += 1
-                self.VisbleMap[cell[0]][cell[1]] = "obstacle"
-                findpath()
+                self.visbleMap[cell[0]][cell[1]] = "obstacle"
+                self.findpath()
 
 
 
 robot_world = world()
-path = [(0,1),(1,0)]
 y , x = robot_world.map_size()
 visible_map = [[None for _ in range(x)] for _ in range(y)]
 visible_map[robot_world.getrobotlocation()[0]][robot_world.getrobotlocation()[1]] = "empty"
-robot = robot(robot_world, visible_map, None, robot_world.getrobotlocation(), path)
+robot = robot(robot_world, visible_map, robot_world.getbattrylocation(), robot_world.getrobotlocation(), [])
 robot.move()
 print ( robot_world.getrobotlocation())
 print ( robot_world.getbattrylocation())
