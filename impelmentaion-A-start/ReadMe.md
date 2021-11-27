@@ -1,4 +1,4 @@
-# Finding the battery
+# Find the battery
 
 ### **Problem**: There is a robot which  is located in an unknown place.The robot's battery is low so it's searching for a battery that knows it would be some where in the map but it doesn't have any infromation about where the battery is and there are some obstacles in it's path that's impossible to pass through them.The problem is to find a path to from robot to the battery.
 
@@ -36,5 +36,6 @@
       | 5   |  4  |  3  |
       | 4   | 3.1 | 2.1 |
       | 3.2 |  3  | 2.9 |
- 1. 
-2. 
+    3. Those who cannot remember the past are condemned to repeat it:
+    <br>
+    In order to not search a repetitive cell and not stack in a loop we get the matrix from the robot every time the robot calls find path and run the algorithm. For example if robot passes the (x,y) cells to time the value of coresponding [x][y] cell in the matrix sets to 2. And in calculating the huristic value we multiply the value of this value to a constant and add it with the cost of huristic to set higher value for the unexplored cells.
