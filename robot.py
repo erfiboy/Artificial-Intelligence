@@ -10,7 +10,7 @@ class world():
         self.show_map()
     
     def ParseMap(self):
-        tree = ET.parse('SampleRoom.xml')
+        tree = ET.parse('SampleRoom4.xml')
         rows = tree.findall('row')
         Map = []
         
@@ -75,9 +75,11 @@ class robot():
         self.stepcount = stepcount
         self.destination = destination
         self.alogorithm_ = Algorithm(visbleMap, location, destination)
+        self.visited_map_ = [[0 for _ in range(len(self.visbleMap[0]))] for _ in range(len(self.visbleMap))]
+
 
     def findpath(self):
-        self.alogorithm_.set_map(self.visbleMap)
+        self.alogorithm_.set_map(self.visbleMap, self.visited_map_)
         self.alogorithm_.set_robot_location(self.location)
         self.path = self.alogorithm_.exec()
 
@@ -108,9 +110,11 @@ class robot():
                 self.location = cell
                 self.stepcount += 1
                 self.visbleMap[cell[0]][cell[1]] = "empty"
+                self.visited_map_[cell[0]][cell[1]] += 1
             elif targetcelltype == "obstacle":
                 self.stepcount += 1
                 self.visbleMap[cell[0]][cell[1]] = "obstacle"
+                self.visited_map_[cell[0]][cell[1]] += 1
                 self.findpath()
 
 
@@ -119,5 +123,5 @@ robot_world = world()
 y , x = robot_world.map_size()
 visible_map = [[None for _ in range(x)] for _ in range(y)]
 visible_map[robot_world.getrobotlocation()[0]][robot_world.getrobotlocation()[1]] = "empty"
-robot = robot(robot_world, visible_map,  robot_world.getbattrylocation(), robot_world.getrobotlocation(), [])
+robot = robot(robot_world, visible_map,  None, robot_world.getrobotlocation(), [])
 robot.move()
