@@ -6,6 +6,8 @@ from math import sin, cos, pi, log
 from numpy.random import choice
 from copy import deepcopy
 import sys
+import time
+start_time = time.time()
 sys.float_info.max
 
 class Node:
@@ -18,17 +20,19 @@ class Node:
 
 class ExpTree:
     
-    def __init__(self, input_x_list = [], input_y_list = []):
+    def __init__(self, input_x_list = [], input_y_list = [] , initalpopulation = 200):
         self.inputxlist_ = input_x_list
         self.inputylist_ = input_y_list
-        self.numberofiteration_ = 10
-        self.numbernextgeneration_ = 10
+        self.numberofiteration_ = 100
+        self.numbernextgeneration_ = 20
+        self.initalpopulation_ = initalpopulation
         self.roots_ = []
         self.fitnesses = []
         self.expressions = []
+        self.numberoffitnesscalls = 0
         self.selectionMethods_ = ["Roulette wheel selection"]
-        self.singleoprands_ = ['cos','sin','abs']
-        self.towoprands_ = ['*','+','-','/'] 
+        self.singleoprands_ = ['cos','sin']
+        self.towoprands_ = ['*','+','-','/','*','+','-','/',"**"] 
     
     def is_leaf(self, node):
         return node.left_ is None and node.right_ is None
@@ -114,16 +118,21 @@ class ExpTree:
                 return left * right
             if root.data_ == '-':
                 return left - right
-            # if root.data_ == '**':
-            #     return int(left) ** int(right)
+            if root.data_ == '**':
+                if (left > 10 and right > 5 or left > 3 and right > 10 or left > 8 and right > 8):
+                    return 10e6
+                return int(left) ** int(right)
             if root.data_ == '/':
                 return left / right
     
     def fitness_function(self, list_y):
         mean_square_error = []
-        
+        self.numberoffitnesscalls += 1
         for i in range(len(list_y)):
-            mean_square_error.append(int((list_y[i] - self.inputylist_[i])**2))
+            try:
+                mean_square_error.append(int((list_y[i] - self.inputylist_[i])**2))
+            except OverflowError:
+                mean_square_error.append(10e6)
         return sum(mean_square_error)
 
     def selection(self):
@@ -136,10 +145,10 @@ class ExpTree:
         for i in range(len(self.roots_)):
             for j in range(i, len(self.roots_)):
                 
-                depth_to_cut_the_tree = random.randint(2, 4)
+                depth_to_cut_the_tree = random.randint(2, 3)
                 left_tree_cut = choice(["r","l"], depth_to_cut_the_tree, p=[0.5, 0.5])
                 
-                depth_to_cut_the_tree = random.randint(2, 4)
+                depth_to_cut_the_tree = random.randint(2, 3)
                 right_tree_cut = choice(["r","l"], depth_to_cut_the_tree, p=[0.5, 0.5])
 
                 first_parent = deepcopy(self.roots_[i])
@@ -192,14 +201,20 @@ class ExpTree:
                 new_roots.append(first_parent)   
                 new_roots.append(second_parent)                       
    
+        # transfer best fathers to the next generation
+        last_generation_roots = []
+        for root in self.roots_:
+            last_generation_roots.append(root) 
+        
         self.roots_ = new_roots
+        self.roots_.extend(last_generation_roots)
    
     def mutatoin(self):
         number_of_mutaion = random.randint(1, len(self.roots_)/5)
         mutated_roots = choice(self.roots_, number_of_mutaion)
         for root in mutated_roots:
             
-            depth_to_mutet_the_tree = random.randint(1, 10)
+            depth_to_mutet_the_tree = random.randint(3, 10)
             direction = choice(["r","l"], depth_to_mutet_the_tree, p=[0.5, 0.5])
 
             p = root
@@ -228,8 +243,10 @@ class ExpTree:
                                 break
                     
                     else:
-                        p.data_ = random.randint(1, 50)
-            
+                        if random.random() > 0.7 :
+                            p.data_ = random.randint(1, 50)
+                        else:
+                            p.data_ = "x"
                     break
                       
     def generate_expression_tree(self, current_depth = 0, not_use_x = False, max_depth = 2):
@@ -247,7 +264,7 @@ class ExpTree:
             secure_random = random.SystemRandom()
             node =  Node(secure_random.choice(self.towoprands_)) 
             node.left_ = self.generate_expression_tree(current_depth+1, not_use_x)
-            if ((node.data_ == '-' or node.data_ == '**') and node.left_.data_ == 'x') or node.data_ == '/':
+            if ((node.data_ == '-' ) and node.left_.data_ == 'x'):
                 not_use_x = True
             node.right_ = self.generate_expression_tree(current_depth+1, not_use_x)
             return node
@@ -259,18 +276,14 @@ class ExpTree:
                 node =  Node('x') 
             return node
 
-    def run_genetic_algorithm(self, first_population_size = 10, first_generation_prob_distribution = [0.1,0.5,0.4]):
+    def run_genetic_algorithm(self, first_generation_prob_distribution = [0.2,0.4,0.4]):
         tree_size = [i for i in range(len(first_generation_prob_distribution))]
-        sizes = choice(tree_size, first_population_size, p=first_generation_prob_distribution)
+        sizes = choice(tree_size, self.initalpopulation_, p=first_generation_prob_distribution)
         
+        i=0
         # generate first population
-        for i in range(first_population_size):
+        for i in range(self.initalpopulation_):
             self.roots_.append(self.generate_expression_tree(max_depth=sizes[i]))    
-        
-        # root = Node("**")
-        # root.left_ = Node("x")
-        # root.right_ = Node("2")
-        # self.roots_.append(root)
         
         for root in self.roots_:
             print(self.create_expression_from_tree(root))
@@ -285,7 +298,7 @@ class ExpTree:
                 self.fitnesses.append(score)
 
             min_score = min(self.fitnesses)
-            if min_score == 0 :
+            if min_score == 0 or min_score < 2 :
                 break
             print("choosen = ",self.create_expression_from_tree(self.roots_[self.fitnesses.index(min_score)])," and min is:" , min_score)    
             # selection
@@ -305,28 +318,62 @@ class ExpTree:
             self.mutatoin()
         
         min_score = min(self.fitnesses)
-        print("choosen = ",self.create_expression_from_tree(self.roots_[self.fitnesses.index(min_score)]))    
+        print("choosen = ",self.create_expression_from_tree(self.roots_[self.fitnesses.index(min_score)]), "in  round ",  i,"th and number of fittness calls is" , self.numberoffitnesscalls)    
         
               
                 
                 
+x_input = [i*pi/2 for i in range(1,50)]
+y_input = []
+tree = ExpTree()
+while True:
+    print("This is Genetic Algorithm ! what can i do for you :")
+    print("1. adjust the initial population : ")
+    print("2. adjust the x list(default is 0 to 50 step of tow) ")
+    print("3. adjust number of iterations: ")
+    print("4. adjust the y list(default you will enter a function2) ")
+    print("5. Run Algorithm: ")
+    input_ = input("please enter a number: ")                
+                                  
+    if input_ == "1":
+        tree.initalpopulation_ = int(input("enter intial population : "))                    
+    
+    elif input_ == "2":
+        n = int(input("Enter number of elements : ")) 
+        for i in range(0, n):
+            ele = int(input("enter the element value : "))
+        x_input.append(ele)    
+    
+    elif input_ == "3":
+        tree.numberofiteration_ = int(input("enter  number of iterations : ")) 
+    
+    elif input_ == "4":
+        n = int(input("Enter number of elements : ")) 
+        for i in range(0, n):
+            ele = int(input("enter the element value : "))
+        y_input.append(ele)    
+        
+    elif input_ == "5":
+        if x_input == []:
+            x_input = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+        if y_input == []:    
+            function = input("enter the function : ") 
+            y_input = [eval(function) for x in x_input]
+        
+        print("sample x is :" , x_input)
+        print("corresponding y is :" , y_input)
+        tree.inputxlist_ = x_input
+        tree.inputylist_ = y_input
+        start_time = time.time()
+        tree.run_genetic_algorithm()
+        print("---the program executed in %s seconds ---" % (time.time() - start_time))
+        break
+    else:
+        print(" enter a correct number :) ")
+        continue
 
-# create_expression_from_tree(root)
 
-x_input = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
-y_input = [0, 1, 4, 9, 16, 25, 36, 49, 64, 81, 100, 121, 144, 169, 196, 225, 256]
 
-tree = ExpTree(input_x_list=x_input, input_y_list=y_input)
-
-tree.run_genetic_algorithm()
-
-# root = Node("**")
-# root.right_ = Node("*")
-# root.left_ = Node("x")
-# root.right_.right_ = Node("2")
-# root.right_.left_= Node("3")
-
-# print(tree.evalaute_tree(root, x =10))
 
 
 
