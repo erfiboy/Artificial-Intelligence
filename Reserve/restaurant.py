@@ -21,10 +21,10 @@ class Node:
 """ parsing the data
 """
 
-df = pd.read_csv('resturant.csv')
+df = pd.read_csv('restaurant.csv')
 col_list = list(df.columns)
 
-df = pd.read_csv('resturant.csv', sep=',', usecols=col_list)
+df = pd.read_csv('restaurant.csv', sep=',', usecols=col_list)
 wait_data =  []
 for element in col_list:
     wait_data.append(df[element].values.tolist())
