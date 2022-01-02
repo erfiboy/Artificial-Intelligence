@@ -1,0 +1,24 @@
+// The Round Table
+digraph "round-table" {
+	"" [label=Pat]
+	c [label=No]
+	"" -> c
+	d [label=Yes]
+	"" -> d
+	e [label=Hun]
+	"" -> e
+	f [label=No]
+	e -> f
+	g [label=Type]
+	e -> g
+	h [label=Fri]
+	g -> h
+	i [label=No]
+	g -> i
+	j [label=No]
+	g -> j
+	k [label=No]
+	h -> k
+	l [label=Yes]
+	h -> l
+}
