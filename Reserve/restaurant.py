@@ -131,7 +131,7 @@ def create_decision_tree(data, parent, col_header):
             choosen_attribute_index = col_header.index(attribute)
     
     node_type = col_header.pop(choosen_attribute_index)
-    data.pop(col_header.index(attribute))
+    data.pop(choosen_attribute_index)
     
     node = Node(parent, node_type, [])
     parent.append_child(node)
