@@ -3,42 +3,76 @@ digraph "round-table" {
 	"" [label=Glucose]
 	c [label=Age]
 	"" -> c
-	d [label=Pregnancies]
+	d [label=No]
 	"" -> d
-	e [label=BloodPressure]
+	e [label=Pregnancies]
 	"" -> e
-	f [label=No]
-	c -> f
-	g [label=Yes]
+	f [label=Insulin]
+	"" -> f
+	g [label=No]
 	c -> g
 	h [label=Yes]
 	c -> h
-	i [label=No]
-	d -> i
+	i [label=Yes]
+	c -> i
 	j [label=Yes]
-	d -> j
-	k [label=No]
-	d -> k
-	l [label=No]
-	d -> l
-	m [label=Insulin]
+	e -> j
+	k [label=BMI]
+	e -> k
+	l [label=Yes]
+	e -> l
+	m [label=Yes]
 	e -> m
-	n [label=No]
+	n [label=Yes]
 	e -> n
-	o [label=DiabetesPedigreeFunction]
-	m -> o
-	p [label=SkinThickness]
-	m -> p
+	o [label=Yes]
+	e -> o
+	p [label=Yes]
+	f -> p
 	q [label=No]
-	m -> q
+	f -> q
 	r [label=No]
-	m -> r
+	f -> r
 	s [label=No]
-	o -> s
-	t [label=Yes]
-	o -> t
+	f -> s
+	t [label=BloodPressure]
+	f -> t
 	u [label=No]
-	p -> u
-	v [label=BMI]
-	p -> v
+	f -> u
+	v [label=Yes]
+	f -> v
+	w [label=Yes]
+	f -> w
+	x [label=Yes]
+	k -> x
+	y [label=Yes]
+	k -> y
+	z [label=Yes]
+	k -> z
+	"{" [label=DiabetesPedigreeFunction]
+	k -> "{"
+	"|" [label=Yes]
+	k -> "|"
+	"}" [label=No]
+	t -> "}"
+	"~" [label=No]
+	t -> "~"
+	"" [label=Yes]
+	t -> ""
+	"" [label=Yes]
+	t -> ""
+	"" [label=Yes]
+	t -> ""
+	"" [label=SkinThickness]
+	"{" -> ""
+	"" [label=Yes]
+	"{" -> ""
+	"" [label=Yes]
+	"{" -> ""
+	"" [label=No]
+	"" -> ""
+	"" [label=Yes]
+	"" -> ""
+	"" [label=Yes]
+	"" -> ""
 }
