@@ -1,24 +1,34 @@
 // The Round Table
 digraph "round-table" {
 	"" [label=Pat]
-	c [label=No]
+	c [label="(none)
+No"]
 	"" -> c
-	d [label=Yes]
+	d [label="(some)
+Yes"]
 	"" -> d
-	e [label=Hun]
+	e [label="(full)
+Hun"]
 	"" -> e
-	f [label=No]
+	f [label="(no)
+No"]
 	e -> f
-	g [label=Type]
+	g [label="(yes)
+Type"]
 	e -> g
-	h [label=Fri]
+	h [label="(thai)
+Fri"]
 	g -> h
-	i [label=No]
+	i [label="(burger)
+No"]
 	g -> i
-	j [label=No]
+	j [label="(italian)
+No"]
 	g -> j
-	k [label=No]
+	k [label="(no)
+No"]
 	h -> k
-	l [label=Yes]
+	l [label="(yes)
+Yes"]
 	h -> l
 }
