@@ -3,12 +3,13 @@ from math import log2
 import numpy as np
 import graphviz
 import csv
-
+from copy import deepcopy
 class Node:
     
-    def __init__(self, parent, decision, child = []):
+    def __init__(self, parent, decision, interval, child = []):
         self.parent_ = parent
         self.decision_ = decision
+        self.decision_interval_ = interval
         self.child_ = child
         self.name_ = ""
 
@@ -17,8 +18,11 @@ class Node:
         
     def set_name(self, name):
         self.name_ = name
+        
+    def set_decision_interval (self, interval):
+        self.decision_interval_ = interval
 
-""" parsing the data
+""" parsing the numeric data for train dicision tree
 """
 
 df = pd.read_csv('restaurant.csv')
@@ -29,6 +33,15 @@ wait_data =  []
 for element in col_list:
     wait_data.append(df[element].values.tolist())
  
+""" parsing phonetic data for visualization
+""" 
+df1 = pd.read_csv('names.csv')
+column = list(df1.columns)
+
+df = pd.read_csv('names.csv', sep=',', usecols=column)
+name_of_data =  []
+for element in column:
+    name_of_data.append(df[element].values.tolist())
     
 """ calculating entropy of the input data
     Note: data should be numeric
@@ -104,16 +117,16 @@ def divide_data_with_indexes(data, index):
 """ create a disicion tree
 """
 
-def create_decision_tree(data, parent, col_header):
+def create_decision_tree(data, name_data, parent, col_header, interval):
     goal_index = len(col_header) -1
     
-    if calculate_entropy(data[goal_index]) == 0:
+    if calculate_entropy(data[len(data)-1]) == 0:
         if data[goal_index][0] == 1:
             decision = "Yes"
         else:
             decision = "No"
         
-        node = Node(parent, decision, [])
+        node = Node(parent, decision, interval , [])
         parent.append_child(node)
         return 
     
@@ -132,20 +145,22 @@ def create_decision_tree(data, parent, col_header):
     
     node_type = col_header.pop(choosen_attribute_index)
     data.pop(choosen_attribute_index)
-    
-    node = Node(parent, node_type, [])
+    name_of_attribute = name_data.pop(choosen_attribute_index)
+    node = Node(parent, node_type, interval, [])
     parent.append_child(node)
     
     for indexes in clusters_indexes:
-        child_data = divide_data_with_indexes(data, indexes)
-        create_decision_tree(child_data, node, col_header)
+        child_data = divide_data_with_indexes(deepcopy(data), indexes)
+        interval = name_of_attribute[indexes[0]]
+        child_name_data = divide_data_with_indexes(deepcopy(name_data), indexes)
+        create_decision_tree(child_data, child_name_data, node, col_header, interval)
      
     return 
 
 
-root = Node(None, "root")
+root = Node(None, "root", "", [])
 
-create_decision_tree(wait_data, root, col_list)
+create_decision_tree(wait_data, name_of_data, root, col_list, "")
 
 
 stack = [root]
@@ -163,14 +178,12 @@ while stack != []:
         else:
             name = chr(ord(name)+1)
             child.set_name(name)
-            dot.node(child.name_, child.decision_)  
+            dot.node(child.name_, "(" + str(child.decision_interval_) + ")" + "\n" + child.decision_)  
             start = stack[0].name_ 
             end = child.name_
             print(start, end)
             dot.edge((start), (end))
-        
         stack.append(child)
-    
     stack.pop(0)
 
 dot.render(directory='doctest-output', view= True).replace('\\', '/')
