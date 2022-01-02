@@ -3,6 +3,7 @@ from math import log2
 import numpy as np
 import graphviz
 import csv
+from copy import deepcopy 
 
 class Node:
     
@@ -28,30 +29,32 @@ wait_data =  []
 
 for element in col_list:
     wait_data.append(df[element].values.tolist())
- 
+print(wait_data[7])
 np_data = np.zeros(shape=(len(wait_data), len(wait_data[0])))
 for i in range(len(wait_data)):
     np_data[i] = np.array(wait_data[i])
    
-   
+""" discretize data by divide the maximum and minimum of the 
+    array into number of intervals
+"""
 def discretize_data():  
     number_of_intervals = 10
-    for j in range(len(np_data)):
-        max_element = np_data[j].max()
-        min_element = np_data[j].min()
+    index = 0
+    for array in np_data:
+        if index == len(np_data)-1:
+            continue
+        max_element = array.max()
+        min_element = array.min()
         steps = np.zeros(number_of_intervals)
         step_size = (max_element - min_element)/number_of_intervals
         
         for i in range(number_of_intervals):
             steps[i] = min_element + i * step_size
             
-        np.digitize(np_data[j], steps)
+        np_data[index] = np.digitize(array, bins=steps)
         print(steps)
+        index += 1
 
-
-discretize_data()
-print(np_data[0])   
-print("---------")
 """ calculating entropy of the input data
     Note: data should be numeric
 """
@@ -122,7 +125,7 @@ def divide_data_with_indexes(data, index):
         
     return divided_data
 
-""" create a decision tree
+""" create a decision tree      
 """
 
 def create_decision_tree(data, parent, col_header):
@@ -139,20 +142,22 @@ def create_decision_tree(data, parent, col_header):
         return 
     
     maximum_gain = 0
-    chosen_attribute_index = ""
+    chosen_attribute_index = 0
     clusters_indexes = []
     
     for attribute in col_header:
         if attribute == col_header[goal_index]:
+            if len(col_header) == 1:
+                return
             continue
         gain ,indexes = calculate_gain(data[col_header.index(attribute)], data[goal_index])
-        if gain > maximum_gain:
+        if gain >= maximum_gain:
             maximum_gain = gain
             clusters_indexes = indexes
             chosen_attribute_index = col_header.index(attribute)
     
     node_type = col_header.pop(chosen_attribute_index)
-    data.pop(col_header.index(attribute))
+    data.pop(chosen_attribute_index)
     
     node = Node(parent, node_type, [])
     parent.append_child(node)
@@ -164,35 +169,39 @@ def create_decision_tree(data, parent, col_header):
     return 
 
 
-# root = Node(None, "root")
+root = Node(None, "root")
 
-# create_decision_tree(wait_data, root, col_list)
+discretize_data()
+
+wait_data = np_data.tolist()
+
+create_decision_tree(deepcopy(wait_data), root, col_list)
 
 
-# stack = [root]
+stack = [root]
 
-# dot = graphviz.Digraph('round-table', comment='The Round Table')  
+dot = graphviz.Digraph('round-table', comment='The Round Table')  
 
-# name = 'a'
-# root.set_name(name)
-# size = 0
-# while stack != []:
-#     for child in stack[0].child_:
-#         if stack[0].name_ == 'a':
-#             name = chr(ord(name)+1)
-#             dot.node(child.name_, child.decision_)  
-#         else:
-#             name = chr(ord(name)+1)
-#             child.set_name(name)
-#             dot.node(child.name_, child.decision_)  
-#             start = stack[0].name_ 
-#             end = child.name_
-#             print(start, end)
-#             dot.edge((start), (end))
+name = 'a'
+root.set_name(name)
+size = 0
+while stack != []:
+    for child in stack[0].child_:
+        if stack[0].name_ == 'a':
+            name = chr(ord(name)+1)
+            dot.node(child.name_, child.decision_)  
+        else:
+            name = chr(ord(name)+1)
+            child.set_name(name)
+            dot.node(child.name_, child.decision_)  
+            start = stack[0].name_ 
+            end = child.name_
+            # print(start, end)
+            dot.edge((start), (end))
         
-#         stack.append(child)
-#     size += 1
-#     stack.pop(0)
+        stack.append(child)
+    size += 1
+    stack.pop(0)
 
-# # dot.render(directory='doctest-output', view= True).replace('\\', '/')
-# print("size = ", size)
+dot.render(directory='doctest-output', view= True).replace('\\', '/')
+print(wait_data[7])

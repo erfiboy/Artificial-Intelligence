@@ -1,0 +1,44 @@
+// The Round Table
+digraph "round-table" {
+	"" [label=Glucose]
+	c [label=Age]
+	"" -> c
+	d [label=Pregnancies]
+	"" -> d
+	e [label=BloodPressure]
+	"" -> e
+	f [label=No]
+	c -> f
+	g [label=Yes]
+	c -> g
+	h [label=Yes]
+	c -> h
+	i [label=No]
+	d -> i
+	j [label=Yes]
+	d -> j
+	k [label=No]
+	d -> k
+	l [label=No]
+	d -> l
+	m [label=Insulin]
+	e -> m
+	n [label=No]
+	e -> n
+	o [label=DiabetesPedigreeFunction]
+	m -> o
+	p [label=SkinThickness]
+	m -> p
+	q [label=No]
+	m -> q
+	r [label=No]
+	m -> r
+	s [label=No]
+	o -> s
+	t [label=Yes]
+	o -> t
+	u [label=No]
+	p -> u
+	v [label=BMI]
+	p -> v
+}
