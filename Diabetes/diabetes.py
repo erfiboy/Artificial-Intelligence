@@ -29,7 +29,7 @@ wait_data =  []
 
 for element in col_list:
     wait_data.append(df[element].values.tolist())
-print(wait_data[7])
+
 np_data = np.zeros(shape=(len(wait_data), len(wait_data[0])))
 for i in range(len(wait_data)):
     np_data[i] = np.array(wait_data[i])
@@ -131,7 +131,7 @@ def divide_data_with_indexes(data, index):
 def create_decision_tree(data, parent, col_header):
     goal_index = len(col_header) -1
     
-    if calculate_entropy(data[goal_index]) == 0:
+    if calculate_entropy(data[len(data)-1]) == 0:
         if data[goal_index][0] == 1:
             decision = "Yes"
         else:
@@ -170,12 +170,13 @@ def create_decision_tree(data, parent, col_header):
 
 
 root = Node(None, "root")
-
+print(wait_data[5])
 discretize_data()
 
 wait_data = np_data.tolist()
+print(wait_data[5])
 
-create_decision_tree(deepcopy(wait_data), root, col_list)
+create_decision_tree(deepcopy(wait_data), root, deepcopy(col_list))
 
 
 stack = [root]
@@ -204,4 +205,3 @@ while stack != []:
     stack.pop(0)
 
 dot.render(directory='doctest-output', view= True).replace('\\', '/')
-print(wait_data[7])
