@@ -18,9 +18,6 @@ class Node:
         
     def set_name(self, name):
         self.name_ = name
-        
-    def set_decision_interval (self, interval):
-        self.decision_interval_ = interval
 
 """ parsing the numeric data for train dicision tree
 """
@@ -145,7 +142,9 @@ def create_decision_tree(data, name_data, parent, col_header, interval):
     
     node_type = col_header.pop(choosen_attribute_index)
     data.pop(choosen_attribute_index)
+    
     name_of_attribute = name_data.pop(choosen_attribute_index)
+    
     node = Node(parent, node_type, interval, [])
     parent.append_child(node)
     

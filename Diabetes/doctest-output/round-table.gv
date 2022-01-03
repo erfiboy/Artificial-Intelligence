@@ -1,78 +1,103 @@
 // The Round Table
 digraph "round-table" {
 	"" [label=Glucose]
-	c [label=Age]
-	"" -> c
-	d [label=No]
+	d [label="[19.9, 39.8]
+No"]
 	"" -> d
-	e [label=Pregnancies]
+	e [label="[39.8, 59.7]
+Pregnancies"]
 	"" -> e
-	f [label=Insulin]
+	f [label="[59.7, 79.6]
+Insulin"]
 	"" -> f
-	g [label=No]
-	c -> g
-	h [label=Yes]
-	c -> h
-	i [label=Yes]
-	c -> i
-	j [label=Yes]
+	g [label="[0.0, 1.7]
+Yes"]
+	e -> g
+	h [label="[0.0, 1.7]
+BMI"]
+	e -> h
+	i [label="[1.7, 3.4]
+Yes"]
+	e -> i
+	j [label="[5.1, 6.8]
+Yes"]
 	e -> j
-	k [label=BMI]
+	k [label="[6.8, 8.5]
+Yes"]
 	e -> k
-	l [label=Yes]
+	l [label="[10.2, 11.9]
+Yes"]
 	e -> l
-	m [label=Yes]
-	e -> m
-	n [label=Yes]
-	e -> n
-	o [label=Yes]
-	e -> o
-	p [label=Yes]
+	m [label="[0.0, 84.6]
+Yes"]
+	f -> m
+	n [label="[0.0, 84.6]
+No"]
+	f -> n
+	o [label="[84.6, 169.2]
+No"]
+	f -> o
+	p [label="[253.8, 338.4]
+No"]
 	f -> p
-	q [label=No]
+	q [label="[338.4, 423.0]
+BloodPressure"]
 	f -> q
-	r [label=No]
+	r [label="[507.6, 592.2]
+No"]
 	f -> r
-	s [label=No]
+	s [label="[592.2, 676.8]
+Yes"]
 	f -> s
-	t [label=BloodPressure]
+	t [label="[676.8, 761.4]
+Yes"]
 	f -> t
-	u [label=No]
-	f -> u
-	v [label=Yes]
-	f -> v
-	w [label=Yes]
-	f -> w
-	x [label=Yes]
-	k -> x
-	y [label=Yes]
-	k -> y
-	z [label=Yes]
-	k -> z
-	"{" [label=DiabetesPedigreeFunction]
-	k -> "{"
-	"|" [label=Yes]
-	k -> "|"
-	"}" [label=No]
-	t -> "}"
-	"~" [label=No]
-	t -> "~"
-	"" [label=Yes]
-	t -> ""
-	"" [label=Yes]
-	t -> ""
-	"" [label=Yes]
-	t -> ""
-	"" [label=SkinThickness]
-	"{" -> ""
-	"" [label=Yes]
-	"{" -> ""
-	"" [label=Yes]
-	"{" -> ""
-	"" [label=No]
-	"" -> ""
-	"" [label=Yes]
-	"" -> ""
-	"" [label=Yes]
-	"" -> ""
+	u [label="[0.0, 6.71]
+Yes"]
+	h -> u
+	v [label="[6.71, 13.42]
+Yes"]
+	h -> v
+	w [label="[13.42, 20.13]
+Yes"]
+	h -> w
+	x [label="[20.13, 26.84]
+DiabetesPedigreeFunction"]
+	h -> x
+	y [label="[26.84, 33.55]
+Yes"]
+	h -> y
+	z [label="[0.0, 12.2]
+No"]
+	q -> z
+	"{" [label="[24.4, 36.6]
+No"]
+	q -> "{"
+	"|" [label="[36.6, 48.8]
+Yes"]
+	q -> "|"
+	"}" [label="[48.8, 61.0]
+Yes"]
+	q -> "}"
+	"~" [label="[73.2, 85.4]
+Yes"]
+	q -> "~"
+	"" [label="[0.08, 0.31]
+SkinThickness"]
+	x -> ""
+	"" [label="[0.08, 0.31]
+Yes"]
+	x -> ""
+	"" [label="[0.31, 0.55]
+Yes"]
+	x -> ""
+	"" [label="[0.0, 9.9]
+No"]
+	"" -> ""
+	"" [label="[9.9, 19.8]
+Yes"]
+	"" -> ""
+	"" [label="[19.8, 29.7]
+Yes"]
+	"" -> ""
 }
