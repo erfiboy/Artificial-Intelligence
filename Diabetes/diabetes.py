@@ -1,5 +1,5 @@
 import pandas as pd
-from math import log2
+from math import log2, inf
 import numpy as np
 import graphviz
 from csv import reader
@@ -38,29 +38,11 @@ np_data = np.zeros(shape=(len(train_data), len(train_data[0])))
 for i in range(len(train_data)):
         np_data[i] = np.array(train_data[i])
    
-# """ parse test data 
-# """   
-# total_number_of_persons = len(df)
-# first_test_person_index = int(fraction_of_train_data * total_number_of_persons) + 1
-
-# test_data = []
-
-# with open('diabetes.csv','r') as f:
-#     csv_reader = reader(f)
-#     index = 0 
-#     for row in csv_reader:
-#         if index < first_test_person_index:
-#             index += 1
-#             continue
-#         test_data.append(row)
-#         index += 1
-
-# a = 10
 """ discretize data by divide the maximum and minimum of the 
     array into number of intervals
 """
 def discretize_data():  
-    number_of_intervals = 10
+    number_of_intervals = 5
     index = 0
     total_intervals = []
     for array in np_data:
@@ -119,7 +101,6 @@ def cluster_data(data, goal):
         
     return clusters , indexes
 
-
 """ calculating the remainder 
 """
 def calculate_remainder(data, goal):
@@ -151,9 +132,10 @@ def divide_data_with_indexes(data, index):
 
 """ create a decision tree      
 """
-def create_decision_tree(data, parent, col_header, interval, steps):
+def create_decision_tree(data, parent, col_header, interval, steps, depth):
     goal_index = len(col_header) -1
     
+    # all data have the same classification
     if calculate_entropy(data[len(data)-1]) == 0:
         if data[goal_index][0] == 1:
             decision = "Yes"
@@ -171,6 +153,15 @@ def create_decision_tree(data, parent, col_header, interval, steps):
     for attribute in col_header:
         if attribute == col_header[goal_index]:
             if len(col_header) == 1:
+                result =  data[-1]
+                yes = result.count(1)
+                total = len(data[-1])
+                if yes >= total * 0.5:
+                    result =  "Yes"
+                else:
+                    result = "No"
+                node = Node(parent, result, interval,[])
+                parent.append_child(node)
                 return
             continue
         gain ,indexes = calculate_gain(data[col_header.index(attribute)], data[goal_index])
@@ -178,6 +169,18 @@ def create_decision_tree(data, parent, col_header, interval, steps):
             maximum_gain = gain
             clusters_indexes = indexes
             chosen_attribute_index = col_header.index(attribute)
+    
+    if maximum_gain == 0:
+        result =  data[-1]
+        yes = result.count(1)
+        total = len(data[-1])
+        if yes >= total * 0.5:
+            result =  "Yes"
+        else:
+            result = "No"
+        node = Node(parent, result, interval,[])
+        parent.append_child(node)
+        return
     
     node_type = col_header.pop(chosen_attribute_index)
     l = data.pop(chosen_attribute_index)
@@ -190,10 +193,13 @@ def create_decision_tree(data, parent, col_header, interval, steps):
     for indexes in clusters_indexes:
         child_data = divide_data_with_indexes(deepcopy(data), indexes)
         if int(l[indexes[0]])-1 == 0:
-            interval = "[" + str(round(interval_list[0],2))+ ", " + str(round(interval_list[1],2)) + "]"
+            interval = str(round(interval_list[0],2))+ ", " + str(round(interval_list[1],2))
         else:
-            interval = "[" + str(round(interval_list[int(l[indexes[0]])-2],2))+ ", " + str(round(interval_list[int(l[indexes[0]])-1],2)) + "]"
-        create_decision_tree(child_data, node, col_header, interval, steps)
+            if int(l[indexes[0]]) >= len(interval_list):
+                str(round(interval_list[int(l[indexes[0]])-1],2))+ ", " + str(inf)
+            else:
+                interval = str(round(interval_list[int(l[indexes[0]])-1],2))+ ", " + str(round(interval_list[int(l[indexes[0]])],2))
+        create_decision_tree(deepcopy(child_data), node, deepcopy(col_header), interval, deepcopy(steps), depth+1)
      
     return 
 
@@ -204,34 +210,42 @@ def evaluate_the_decison_tree(test_data, decision_tree_root, columns_header):
     number_of_fails = 0
     for data in test_data:
         result = find_answer(decision_tree_root, data, columns_header)
-        if result == data[-1]:
+        if result == int(data[-1]):
             number_of_success += 1
         else:
             number_of_fails +=1
             
     return number_of_success, number_of_fails            
         
-        
-        
+""" find yes or no for a specific data
+"""          
 def find_answer(node , data, columns_header):
+    total_number_of_child = len(node.child_) -1
     if node.decision_ == "Yes":
         return 1
     elif node.decision_ == "No":
         return 0
     else:
         index = columns_header.index(node.decision_)
+        child_number = 0
         for child in node.child_:
-            if child.decision_interval_ == data[index]:
-                find_answer(child, data, columns_header)
-                break
-        
+            Min = float(list(child.decision_interval_.split(","))[0])
+            Max = float(list(child.decision_interval_.split(","))[1])
+            if child_number == 0 and Min >= float(data[index]):
+                return find_answer(child, data, columns_header)
+            if  Min <= float(data[index]) and Max >= float(data[index]):
+                return find_answer(child, data, columns_header)
+            if child_number == total_number_of_child and float(data[index]) > Max:
+                return find_answer(child, data, columns_header)
+            child_number += 1
+                
 """ Seperate train and test data 
     and reshape each data set 
 """        
 def seperate_data(data, fraction_of_train_data):
     train_data = [[] for i in range(len(data))]
     index_of_first_test_data = int(fraction_of_train_data*len(data[0])) + 1
-    test_data = [[] for i in range(int((1-fraction_of_train_data)*len(data[0])))]
+    test_data = []
     data = data.tolist()
     for i in range(len(data)):
         for j in range(len(data[0])): 
@@ -240,24 +254,29 @@ def seperate_data(data, fraction_of_train_data):
             else:
                 break
             
-    for i in range(index_of_first_test_data, len(data[0])):
-        for j in range(len(data)):
-            test_data[i- index_of_first_test_data].append(data[j][i])
+    with open('diabetes.csv', 'r') as f:
+        csv_dict_reader = reader(f)
+        index = 0 
+        for row in csv_dict_reader:
+            if index < index_of_first_test_data:
+                index += 1
+                continue
+            index += 1
+            test_data.append(row)
                 
     return train_data, test_data                
-
 
 """ Train the tree the evaluate the results  
 """
 if __name__ == '__main__':
     root = Node(None, "root", '', [])
-    fraction_of_train_data = 0.9
+    fraction_of_train_data = 0.7
     # print(train_data[5])
     steps = discretize_data()
     # print(type(steps))
     train_data , test_data = seperate_data(np_data, fraction_of_train_data)
     
-    create_decision_tree(deepcopy(train_data), root, deepcopy(col_list), '', steps)
+    create_decision_tree(deepcopy(train_data), root, deepcopy(col_list), '', steps, 0)
     
     tree_root = root.child_[0]
 
@@ -281,9 +300,7 @@ if __name__ == '__main__':
             else:
                 name = chr(ord(name)+1)
                 child.set_name(name)
-                if child.decision_ == 'Age':
-                    continue
-                dot.node(child.name_, str(child.decision_interval_) + "\n" + child.decision_)  
+                dot.node(child.name_, "[" + str(child.decision_interval_) + "]" + "\n" + child.decision_)  
                 start = stack[0].name_ 
                 end = child.name_
                 # print(start, end)
