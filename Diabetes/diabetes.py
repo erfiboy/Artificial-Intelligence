@@ -1,18 +1,20 @@
-import pandas as pd
-from math import log2, inf
-import numpy as np
 import graphviz
+import numpy as np
+import pandas as pd
 from csv import reader
 from copy import deepcopy 
-
+from math import log2, inf
+import matplotlib.pyplot as plt
 class Node:
     
-    def __init__(self, parent, decision, interval, child = []):
+    def __init__(self, parent, decision, interval, gain, entropy ,child = []):
+        self.name_ = ""
+        self.child_ = child
+        self.gain_ = gain
+        self.entropy_ = entropy
         self.parent_ = parent
         self.decision_ = decision
         self.decision_interval_ = interval
-        self.child_ = child
-        self.name_ = ""
 
     def append_child(self, child):
         self.child_.append(child)
@@ -41,11 +43,11 @@ for i in range(len(train_data)):
 """ discretize data by divide the maximum and minimum of the 
     array into number of intervals
 """
-def discretize_data(number_of_intervals):  
+def discretize_data(number_of_intervals, data):  
     index = 0
     total_intervals = []
-    for array in np_data:
-        if index == len(np_data)-1:
+    for array in data:
+        if index == len(data)-1:
             continue
         max_element = array.max()
         min_element = array.min()
@@ -55,11 +57,11 @@ def discretize_data(number_of_intervals):
         for i in range(number_of_intervals):
             steps[i] = min_element + i * step_size
             
-        np_data[index] = np.digitize(array, bins=steps)
+        data[index] = np.digitize(array, bins=steps)
         # print(steps)
         index += 1
         total_intervals.append(steps)
-    return total_intervals
+    return total_intervals, data
 
 """ calculating entropy of the input data
     Note: data should be numeric
@@ -115,7 +117,7 @@ def calculate_remainder(data, goal):
 def calculate_gain(data, goal):
     data_entropy_before_clustering = calculate_entropy(goal)
     remainder, indexes = calculate_remainder(data, goal)
-    return data_entropy_before_clustering - remainder , indexes
+    return data_entropy_before_clustering - remainder , indexes , data_entropy_before_clustering
 
 """ make the data ready for the next clusters or layers of the tree
 """
@@ -141,11 +143,12 @@ def create_decision_tree(data, parent, col_header, interval, steps, depth):
         else:
             decision = "No"
         
-        node = Node(parent, decision, interval,[])
+        node = Node(parent, decision, interval, 0, 0, [])
         parent.append_child(node)
         return 
     
     maximum_gain = 0
+    max_entropy = 0
     chosen_attribute_index = 0
     clusters_indexes = []
     
@@ -159,13 +162,14 @@ def create_decision_tree(data, parent, col_header, interval, steps, depth):
                     result =  "Yes"
                 else:
                     result = "No"
-                node = Node(parent, result, interval,[])
+                node = Node(parent, result, interval, 0, calculate_entropy(result), [])
                 parent.append_child(node)
                 return
             continue
-        gain ,indexes = calculate_gain(data[col_header.index(attribute)], data[goal_index])
+        gain ,indexes , entropy = calculate_gain(data[col_header.index(attribute)], data[goal_index])
         if gain >= maximum_gain:
             maximum_gain = gain
+            max_entropy = entropy
             clusters_indexes = indexes
             chosen_attribute_index = col_header.index(attribute)
     
@@ -177,7 +181,7 @@ def create_decision_tree(data, parent, col_header, interval, steps, depth):
             result =  "Yes"
         else:
             result = "No"
-        node = Node(parent, result, interval,[])
+        node = Node(parent, result, interval, 0, calculate_entropy(result),[])
         parent.append_child(node)
         return
     
@@ -186,7 +190,7 @@ def create_decision_tree(data, parent, col_header, interval, steps, depth):
     
     interval_list = steps.pop(chosen_attribute_index).tolist()
     
-    node = Node(parent, node_type, interval, [])
+    node = Node(parent, node_type, interval, maximum_gain, max_entropy, [])
     parent.append_child(node)
     
     for indexes in clusters_indexes:
@@ -265,30 +269,13 @@ def seperate_data(data, fraction_of_train_data):
                 
     return train_data, test_data                
 
-""" Train the tree the evaluate the results  
+""" visualize graph with graphviz
 """
-if __name__ == '__main__':
-    root = Node(None, "root", '', [])
-    fraction_of_train_data = 0.7
-    # print(train_data[5])
-    steps = discretize_data(5)
-    # print(type(steps))
-    train_data , test_data = seperate_data(np_data, fraction_of_train_data)
-    
-    create_decision_tree(deepcopy(train_data), root, deepcopy(col_list), '', steps, 0)
-    
-    tree_root = root.child_[0]
-
-    number_of_success , number_of_fails = evaluate_the_decison_tree(test_data, tree_root, deepcopy(col_list))
-
-    print("number of fails :",number_of_fails)
-    print("number of success :",number_of_success)
-    print("precente" , number_of_success/(number_of_fails+number_of_success))
-
+def visualize(root):
     stack = [root]
-
+    tree_root = root.child_[0]
+    number_of_success , number_of_fails = evaluate_the_decison_tree(test_data, tree_root, deepcopy(col_list))
     dot = graphviz.Digraph('round-table', comment='The Round Table')  
-
     name = 'a'
     root.set_name(name)
     size = 0
@@ -296,18 +283,78 @@ if __name__ == '__main__':
         for child in stack[0].child_:
             if stack[0].name_ == 'a':
                 name = chr(ord(name)+1)
-                dot.node(child.name_, child.decision_)  
+                entropy = "\n" +"H(V) = " + str(round(child.entropy_,2)) 
+                gain =  "\n" + "G(V) = " + str(round(child.gain_,2)) 
+                dot.node(child.name_, child.decision_ + entropy  + gain) 
             else:
                 name = chr(ord(name)+1)
                 child.set_name(name)
-                dot.node(child.name_, "[" + str(child.decision_interval_) + "]" + "\n" + child.decision_)  
+                entropy = "\n" +"H(V) = " + str(round(child.entropy_,2)) 
+                gain = "\n" + "G(V) = " + str(round(child.gain_,2))
+                dot.node(child.name_, child.decision_ + entropy  + gain)  
                 start = stack[0].name_ 
                 end = child.name_
-                # print(start, end)
-                dot.edge((start), (end))
-            
+                dot.edge((start), (end), "(" + str(child.decision_interval_) + ")")
             stack.append(child)
-        size += 1
+        size = size + 1
         stack.pop(0)
-
+        
+    success_rate = number_of_success/(number_of_fails+number_of_success)
+    print("number of fails :",number_of_fails)
+    print("number of success :",number_of_success)
+    print("precente = " , success_rate, "%")
+    print("Number of Nodes = ", size)
+    
+    dot.node("result ", " Success Rate = " + str(round(success_rate*100,3)) + "% \n" 
+             + " total node size = " + str(size))
+    
     dot.render(directory='doctest-output', view= True).replace('\\', '/')
+    
+""" test the trained data with different train 
+    percentages and number of clustring 
+"""
+def plot_different_training():  
+    number_of_child = [i+1 for i in range(40)]
+    success_precentage = []
+    for i in number_of_child:
+        test_data = deepcopy(np_data)
+        root = Node(None, "root", '', 0, 0, [])
+        fraction_of_train_data = 0.7
+        steps ,test_data = discretize_data(i, test_data)
+        train_data , test_data = seperate_data(test_data, fraction_of_train_data)
+        create_decision_tree(deepcopy(train_data), root, deepcopy(col_list), '', steps, 0)
+        tree_root = root.child_[0]
+        number_of_success , number_of_fails = evaluate_the_decison_tree(test_data, tree_root, deepcopy(col_list))
+        success_precentage.append(number_of_success/(number_of_fails + number_of_success))
+    
+    plt.plot(number_of_child,success_precentage)
+    plt.show()
+    
+    fraction_of_train_data_step = [i/100 for i in range(50,100,5)]
+    success_precentage = []
+    for i in fraction_of_train_data_step:
+        test_data = deepcopy(np_data)
+        root = Node(None, "root", '', 0, 0, [])
+        fraction_of_train_data = i
+        steps ,test_data = discretize_data(4, test_data)
+        train_data , test_data = seperate_data(test_data, fraction_of_train_data)
+        create_decision_tree(deepcopy(train_data), root, deepcopy(col_list), '', steps, 0)
+        tree_root = root.child_[0]
+        number_of_success , number_of_fails = evaluate_the_decison_tree(test_data, tree_root, deepcopy(col_list))
+        success_precentage.append(number_of_success/(number_of_fails + number_of_success))
+    
+    plt.plot(fraction_of_train_data_step,success_precentage)
+    plt.show()
+
+""" Train the tree the evaluate the results  
+"""
+if __name__ == '__main__':
+    
+    root = Node(None, "root", '', 0, 0, [])
+    fraction_of_train_data = 0.7
+    steps, data = discretize_data(5, deepcopy(np_data))
+    train_data , test_data = seperate_data(data, fraction_of_train_data)
+    create_decision_tree(deepcopy(train_data), root, deepcopy(col_list), '', steps, 0)
+    tree_root = root.child_[0]
+    visualize(root)
+    plot_different_training()
