@@ -41,8 +41,7 @@ for i in range(len(train_data)):
 """ discretize data by divide the maximum and minimum of the 
     array into number of intervals
 """
-def discretize_data():  
-    number_of_intervals = 5
+def discretize_data(number_of_intervals):  
     index = 0
     total_intervals = []
     for array in np_data:
@@ -272,7 +271,7 @@ if __name__ == '__main__':
     root = Node(None, "root", '', [])
     fraction_of_train_data = 0.7
     # print(train_data[5])
-    steps = discretize_data()
+    steps = discretize_data(5)
     # print(type(steps))
     train_data , test_data = seperate_data(np_data, fraction_of_train_data)
     
@@ -284,6 +283,7 @@ if __name__ == '__main__':
 
     print("number of fails :",number_of_fails)
     print("number of success :",number_of_success)
+    print("precente" , number_of_success/(number_of_fails+number_of_success))
 
     stack = [root]
 
