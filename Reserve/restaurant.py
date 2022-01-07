@@ -127,7 +127,7 @@ def create_decision_tree(data, name_data, parent, col_header, interval):
         return 
     
     maximum_gain = 0
-    entropy = 0
+    maximum_entropy = 0
     choosen_attribute_index = ""
     clusters_indexes = []
     
@@ -137,6 +137,7 @@ def create_decision_tree(data, name_data, parent, col_header, interval):
         gain ,indexes ,entropy = calculate_gain(data[col_header.index(attribute)], data[goal_index])
         if gain > maximum_gain:
             maximum_gain = gain
+            maximum_entropy = entropy
             clusters_indexes = indexes
             choosen_attribute_index = col_header.index(attribute)
     
@@ -145,7 +146,7 @@ def create_decision_tree(data, name_data, parent, col_header, interval):
     
     name_of_attribute = name_data.pop(choosen_attribute_index)
     
-    node = Node(parent, node_type, interval, maximum_gain, entropy, [])
+    node = Node(parent, node_type, interval, maximum_gain, maximum_entropy, [])
     parent.append_child(node)
     
     for indexes in clusters_indexes:
