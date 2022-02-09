@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from sklearn.neural_network import MLPRegressor
 
 def linear(domain):
-    result = [ i+ 4 + random.random()  for i in domain]
+    result = [ i+ 4 + 100*random.random()  for i in domain]
     return result
 
 def calculate_error(estimated, goal):
@@ -38,6 +38,6 @@ test_plt,  = plt.plot(x_test, y_result, label='Test')
 expected_plt,  = plt.plot(x_test, y_test, label='Expected_result')
 ax.set_title('Mean squared error: ' + str(round(error,3)))
 ax.legend(handles=[train_plt, test_plt, expected_plt])
-name = "linear_" + str(train_domain) + "_" + str(test_domain) + "_" + str(number_of_iteration) + "_" + str(hidden_layer) + '.png'
+name = "linear_100small" + str(train_domain) + "_" + str(test_domain) + "_" + str(number_of_iteration) + "_" + str(hidden_layer) + '.png'
 plt.savefig(name)
 plt.show()
