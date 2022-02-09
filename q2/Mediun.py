@@ -1,16 +1,19 @@
 import math
+import random
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.neural_network import MLPRegressor
 
 def sin(domain):
-    result = [math.sin(i/5) for i in domain]
+    result = [math.sin(i/5) + 5*random.random() for i in domain]
     return result
 
 def calculate_error(estimated, goal):
     return np.sum((estimated-goal)**2)**0.5/len(estimated)
 
 # Test for the EASY function
+random.seed(1)
+
 train_domain = (-50, 50)
 x_train = np.linspace(train_domain[0], train_domain[1], 250).reshape(-1, 1)
 y_train = np.array(sin(x_train)).reshape(-1, 1)
@@ -36,6 +39,6 @@ test_plt,  = plt.plot(x_test, y_result, label='Test')
 expected_plt,  = plt.plot(x_test, y_test, label='Expected_result')
 ax.set_title('Mean squared error: ' + str(round(error,3)))
 ax.legend(handles=[train_plt, test_plt, expected_plt])
-name = "sin_" + str(train_domain) + "_" + str(test_domain) + "_" + str(number_of_iteration) + "_" + str(hidden_layer) + '.png'
+name = "sin_5small" + str(train_domain) + "_" + str(test_domain) + "_" + str(number_of_iteration) + "_" + str(hidden_layer) + '.png'
 plt.savefig(name)
 plt.show()
