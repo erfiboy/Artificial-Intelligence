@@ -2,6 +2,7 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.neural_network import MLPRegressor
+from sklearn.metrics import mean_squared_error
 
 def linear(domain):
     result = [ i+ 4 + 100*random.random()  for i in domain]
@@ -30,7 +31,7 @@ trained_netwoek = MLPRegressor( hidden_layer_sizes= hidden_layer,
 
 y_result = trained_netwoek.predict(x_test)
 
-error = calculate_error(y_result, y_test)
+error = mean_squared_error(y_result, y_test)
 
 fig, ax = plt.subplots()
 train_plt, = plt.plot(x_train, y_train, label='Train',  linewidth=3, linestyle=':')
@@ -38,6 +39,6 @@ test_plt,  = plt.plot(x_test, y_result, label='Test')
 expected_plt,  = plt.plot(x_test, y_test, label='Expected_result')
 ax.set_title('Mean squared error: ' + str(round(error,3)))
 ax.legend(handles=[train_plt, test_plt, expected_plt])
-name = "linear_100small" + str(train_domain) + "_" + str(test_domain) + "_" + str(number_of_iteration) + "_" + str(hidden_layer) + '.png'
+name = "linear_100small.png"
 plt.savefig(name)
 plt.show()
