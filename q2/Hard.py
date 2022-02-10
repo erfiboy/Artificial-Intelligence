@@ -3,9 +3,10 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.neural_network import MLPRegressor
+from sklearn.metrics import mean_squared_error
 
 def exponential(domain):
-    result = [ math.sin(2*math.pi*i) + math.sin(5*math.pi*i) + 5*random.random() for i in domain]
+    result = [ math.sin(2*math.pi*i) + math.sin(5*math.pi*i) + 10*random.random() for i in domain]
     return result
 
 def calculate_error(estimated, goal):
@@ -39,6 +40,6 @@ expected_plt,  = plt.plot(x_test, y_test,linewidth=0.5, label='Expected_result')
 test_plt,  = plt.plot(x_test, y_result, label='Test', linewidth=3)
 ax.set_title('Mean squared error: ' + str(round(error,3)))
 ax.legend(handles=[train_plt, test_plt, expected_plt])
-name = "exponential_5small" + str(train_domain) + "_" + str(test_domain) + "_" + str(number_of_iteration) + "_" + str(hidden_layer) + '.png'
+name = "exponential_10small.png"
 plt.savefig(name)
 plt.show()

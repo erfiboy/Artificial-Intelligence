@@ -11,16 +11,17 @@ def calculate_error(estimated, goal):
     return np.sum((estimated-goal)**2)**0.5/len(estimated)
 
 # Test for the EASY function
-train_domain = (-2, 2)
-x_train = np.linspace(train_domain[0], train_domain[1], 2000).reshape(-1, 1)
+points = 7000
+train_domain = (-4, 4)
+x_train = np.linspace(train_domain[0], train_domain[1], points).reshape(-1, 1)
 y_train = np.array(exponential(x_train)).reshape(-1, 1)
 
 test_domain = (-4, 4)
 x_test = np.linspace(test_domain[0], test_domain[1], 8000).reshape(-1, 1)
 y_test = np.array(exponential(x_test)).reshape(-1, 1)
 
-number_of_iteration = 500
-hidden_layer = (10,30,10,30,10,30)
+number_of_iteration = 400
+hidden_layer = (20,40,50,30)
 trained_netwoek = MLPRegressor( hidden_layer_sizes= hidden_layer,
                                 max_iter=number_of_iteration,
                                 random_state=1,
@@ -36,6 +37,6 @@ test_plt,  = plt.plot(x_test, y_result, label='Test')
 expected_plt,  = plt.plot(x_test, y_test, label='Expected_result')
 ax.set_title('Mean squared error: ' + str(round(error,3)))
 ax.legend(handles=[train_plt, test_plt, expected_plt])
-name = "exponential_" + str(train_domain) + "_" + str(test_domain) + "_" + str(number_of_iteration) + "_" + str(hidden_layer) + '.png'
+name = "exponential_" + str(points) + '.png'
 plt.savefig(name)
 plt.show()
