@@ -1,8 +1,15 @@
+import os
 import random
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.neural_network import MLPRegressor
 from sklearn.metrics import mean_squared_error
+
+def clearConsole():
+    command = 'clear'
+    if os.name in ('nt', 'dos'):  # If Machine is running on Windows, use cls
+        command = 'cls'
+    os.system(command)
 
 def linear(domain):
     result = []
@@ -23,15 +30,25 @@ test_domain_y = (100, 250)
 x_test = np.transpose(np.array([np.linspace(test_domain_x[0], test_domain_x[1], 200),np.linspace(test_domain_y[0], test_domain_y[1], 200)]))
 z_test= np.array(linear(x_test))
 
-number_of_iteration = 10000
-hidden_layer = (10, 10, 10)
-trained_netwoek = MLPRegressor( hidden_layer_sizes= hidden_layer,
-                                max_iter=number_of_iteration,
-                                random_state=1,
-                                shuffle=True).fit(x_train, z_train)
+number_of_iteration = 1000
+best_error = 1e20
+best_result = None
+best_network = None
+best_hidden_layer = None
+for i in range(10,20):
+    for j in range(10,20):
+        for k in range(10,20):
+            hidden_layer = (i,j,k)
+            trained_netwoek = MLPRegressor( hidden_layer_sizes= hidden_layer,
+                                            max_iter=number_of_iteration,
+                                            random_state=1,
+                                            shuffle=True).fit(x_train, z_train)
+            z_result =  np.array(trained_netwoek.predict(x_test))
+            error = mean_squared_error(z_result, z_test)
+            if (best_error > error):
+                best_error = error
+                best_hidden_layer = hidden_layer
+                best_network = trained_netwoek
 
-z_result =  np.array(trained_netwoek.predict(x_test))
-
-error = mean_squared_error(z_result, z_test)
-
-print('MSE:'+str(error))
+clearConsole()
+print('MSE:'+str(best_error), "in network with hidden layer equals to: " , str(best_hidden_layer))
