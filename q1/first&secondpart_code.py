@@ -5,14 +5,14 @@ from sklearn.datasets import make_blobs, make_circles, make_multilabel_classific
 import matplotlib.pyplot as plt
 
 n_samples = 500
-cluster_std = 1
-X, y = make_blobs(n_samples=n_samples, centers=2, center_box = (- 0.1, 0.1),
+cluster_std = 0.2
+X, y = make_blobs(n_samples=n_samples, centers=2,
                   random_state=0, cluster_std= cluster_std)
 
 # c = 100
-kernel = "sigmoid"
-coef0 = 1
-clf = svm.SVC(kernel=kernel,  coef0 = coef0)
+kernel = "linear"
+C = 1
+clf = svm.SVC(kernel=kernel,  C = C)
 clf.fit(X, y)
 
 plt.scatter(X[:, 0], X[:, 1], c=y, s=30, cmap=plt.cm.Paired)
@@ -44,7 +44,7 @@ ax.set_title('SVM classification')
 directory = os.path.dirname(os.path.abspath(__file__))
 
 name = "\\kernel_" + str(kernel) +  "_samples_" + str(n_samples) + "_cluster_std_" \
-                    + str(cluster_std) + "_coef0_" + str(coef0) + ".png"
+                    + str(cluster_std) + "_C_" + str(C) + ".png"
 
 save_path = directory + "\\results" + name
 print(save_path)
