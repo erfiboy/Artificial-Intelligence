@@ -1,0 +1,9 @@
+*.png
+*.PNG
+*.jpg
+*.pdf
+*.style
+*.zip
+*.pyc
+/__pycache__
+/[Ll]atex

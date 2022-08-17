@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rows>
+<row>
+	<cell>robot</cell>
+	<cell>empty</cell>
+	<cell>obstacle</cell>
+	<cell>Battery</cell>
+</row>
+<row>
+	<cell>empty</cell>
+	<cell>obstacle</cell>
+	<cell>obstacle</cell>
+	<cell>empty</cell>
+</row>
+<row>
+	<cell>empty</cell>
+	<cell>empty</cell>
+	<cell>empty</cell>
+	<cell>empty</cell>
+</row>
+</rows>
